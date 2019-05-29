@@ -51,7 +51,7 @@
     ((eq (car c) :cdr)
      (vm (cons (cdr (car s)) (cdr s)) e (cdr c) d))
     ((eq (car c) :cons)
-     (vm (cons (cons (cadr s) (car s)) (cddr s)) e (cdr c) d))
+     (vm (cons (cons (car s) (cadr s)) (cddr s)) e (cdr c) d))
     ((eq (car c) :eq)
      (vm (cons (eq (cadr s) (car s)) (cddr s)) e (cdr c) d))
     ((eq (car c) :less)
