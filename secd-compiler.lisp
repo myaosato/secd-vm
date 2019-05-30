@@ -10,7 +10,7 @@
             append (compile-to-secd (nth ind args) names nil))))
 
 (defun compile-list (exps names code)
-  (if (eq exps nil)
+  (if (null exps)
       (cons :ldc (cons nil code))
       (compile-list (cdr exps)
                     names 
@@ -30,6 +30,7 @@
       nil))
 
 (defun location (sym names)
+  (if (null names) (error "unbound variable ~A" sym))
   (if (member sym (car names))
       (cons 0 (position sym (car names)))
       (let ((loc (location sym (cdr names))))
@@ -41,8 +42,16 @@
         (args (compile-let-exps (cadr exp))))
     (let ((body (compile-to-secd (caddr exp)
                                  new-names
-                                 (cons :rtn '()))))
+                                 (cons :rtn nil))))
       (compile-list args names (cons :ldf (cons body (cons :ap code)))))))
+
+(defun compile-let* (exp names code)
+  (let ((new-names (cons (compile-let-vars (cadr exp)) names))
+        (args (compile-let-exps (cadr exp))))
+    (let ((body (compile-to-secd (caddr exp)
+                                 new-names
+                                 (cons :rtn nil))))
+      (cons :dum (compile-list args new-names (cons :ldf (cons body (cons :rap code))))))))
 
 (defun compile-if (exp names code)
   (let ((code-then (compile-to-secd (caddr exp) names (cons :join nil)))
@@ -60,7 +69,8 @@
             (t (error "~A is a not support type value" exp))) ;; TODO
       (let ((op (car exp))
             (args (cdr exp)))
-        (cond ((eq op 'cons) (compile-embedded-op :cons (reverse args) 2 names code))
+        (cond ((eq op 'quote) (cons :ldc (cons (cadr exp) code)))
+              ((eq op 'cons) (compile-embedded-op :cons (reverse args) 2 names code))
               ((eq op 'car) (compile-embedded-op :car args 1 names code))
               ((eq op 'cdr) (compile-embedded-op :cdr args 1 names code))
               ((eq op 'eq) (compile-embedded-op :eq args 2 names code))
@@ -78,6 +88,8 @@
                  (cons :ldf (cons cf code))))
               ((eq (car exp) 'let)
                (compile-let exp names code))
+              ((eq (car exp) 'let*)
+               (compile-let* exp names code))
               ((eq (car exp) 'if)
                (compile-if exp names code))
               (t (compile-list (cdr exp)
