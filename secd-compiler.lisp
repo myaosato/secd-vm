@@ -35,6 +35,22 @@
       (let ((loc (location sym (cdr names))))
         (cons (+ 1 (car loc)) (cdr loc)))))
 
+(defun compile-let (exp names code)
+  ;; letは新しい束縛の環境でbodyを即評価するってことかな
+  (let ((new-names (cons (compile-let-vars (cadr exp)) names))
+        (args (compile-let-exps (cadr exp))))
+    (let ((body (compile-to-secd (caddr exp)
+                                 new-names
+                                 (cons :rtn '()))))
+      (compile-list args names (cons :ldf (cons body (cons :ap code)))))))
+
+(defun compile-if (exp names code)
+  (let ((code-then (compile-to-secd (caddr exp) names (cons :join nil)))
+        (code-else (compile-to-secd (cadddr exp) names (cons :join nil))))
+    (compile-to-secd (cadr exp) 
+                     names
+                     (cons :sel (cons code-then (cons code-else code))))))
+
 (defun compile-to-secd (exp names code)
   (if (atom exp)
       (cond ((integerp exp)
@@ -60,13 +76,10 @@
                                           (cons (cadr exp) names) 
                                           (cons :rtn nil))))
                  (cons :ldf (cons cf code))))
-              ((eq (car exp) 'let) ;; letは新しい束縛の環境でbodyを即評価するってことかな
-               (let ((new-names (cons (compile-let-vars (cadr exp)) names))
-                     (args (compile-let-exps (cadr exp))))
-                 (let ((body (compile-to-secd (caddr exp)
-                                              new-names
-                                              (cons :rtn '()))))
-                   (compile-list args names (cons :ldf (cons body (cons :ap code)))))))
+              ((eq (car exp) 'let)
+               (compile-let exp names code))
+              ((eq (car exp) 'if)
+               (compile-if exp names code))
               (t (compile-list (cdr exp)
                                names
                                (compile-to-secd (car exp) names (cons :ap code))))))))
