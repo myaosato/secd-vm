@@ -1,11 +1,11 @@
 (uiop/package:define-package :secd-vm/secd-vm (:nicknames) (:use :cl) (:shadow)
-                             (:export :vm-step :vm) (:intern))
+                             (:export :make-vm :vm-run :vm-step :vm) (:intern))
 (in-package :secd-vm/secd-vm)
 ;;don't edit above
 
 (defun ld (s e c d)
   (destructuring-bind (i &rest cr) (cdr c)
-    (list (cons (nth (car i) (nth (cdr i) e)) s) e cr d)))
+    (list (cons (nth (cdr i) (nth (car i) e)) s) e cr d)))
 
 (defun ldc (s e c d)
   (destructuring-bind (x &rest cr) (cdr c)
@@ -109,3 +109,23 @@
 (defun vm-step (secd)
   (destructuring-bind (s e c d) secd
     (vm s e c d)))
+
+(defun vm-run (s e c d)
+  (do ((state (list s e c d))
+       (stop nil))
+      (stop state) 
+    o(multiple-value-bind (next-state stop?) (vm-step state)
+      (setf state next-state)
+      (setf stop stop?))))
+
+(defun make-vm (c)
+  (let ((state (list nil nil c nil))
+        (stop nil))
+    (lambda ()
+      (if stop
+          state
+          (multiple-value-bind (next-state stop?) (vm-step state)
+            (setf state next-state)
+            (setf stop stop?)
+            state)))))
+  
