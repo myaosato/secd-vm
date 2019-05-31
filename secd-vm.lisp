@@ -101,7 +101,7 @@
     ((eq (car c) :less) (vm-less s e c d))
     ((eq (car c) :add) (vm-add s e c d))
     ((eq (car c) :sub) (vm-sub s e c d))
-    ((eq (car c) :atom (vm-atom s e c d)))
+    ((eq (car c) :atom) (vm-atom s e c d))
     ((eq (car c) :symbolp) (vm-symbolp s e c d))
     ((eq (car c) :integerp) (vm-integerp s e c d))
     (t (error "~{~A ~}" (list s e c d)))))
