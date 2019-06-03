@@ -114,7 +114,7 @@
   (do ((state (list s e c d))
        (stop nil))
       (stop state) 
-    o(multiple-value-bind (next-state stop?) (vm-step state)
+    (multiple-value-bind (next-state stop?) (vm-step state)
       (setf state next-state)
       (setf stop stop?))))
 
