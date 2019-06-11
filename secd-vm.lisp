@@ -68,6 +68,17 @@
 (defun vm-sub (s e c d)
   (list (cons (- (cadr s) (car s)) (cddr s)) e (cdr c) d))
 
+(defun vm-mul (s e c d)
+  (list (cons (* (cadr s) (car s)) (cddr s)) e (cdr c) d))
+
+(defun vm-div (s e c d)
+  (list (cons (floor (cadr s) (car s)) (cddr s)) e (cdr c) d))
+
+(defun vm-rem (s e c d)
+  (list (cons (cadr (multiple-value-list (floor (cadr s) (car s))))
+              (cddr s))
+        e (cdr c) d))
+
 (defun vm-atom (s e c d)
   (list (cons (atom (car s)) (cdr s)) e (cdr c) d))
 
@@ -101,6 +112,9 @@
     ((eq (car c) :less) (vm-less s e c d))
     ((eq (car c) :add) (vm-add s e c d))
     ((eq (car c) :sub) (vm-sub s e c d))
+    ((eq (car c) :mul) (vm-mul s e c d))
+    ((eq (car c) :div) (vm-div s e c d))
+    ((eq (car c) :rem) (vm-rem s e c d))
     ((eq (car c) :atom) (vm-atom s e c d))
     ((eq (car c) :symbolp) (vm-symbolp s e c d))
     ((eq (car c) :integerp) (vm-integerp s e c d))
