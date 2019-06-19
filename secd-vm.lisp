@@ -1,5 +1,9 @@
-(uiop/package:define-package :secd-vm/secd-vm (:nicknames) (:use :cl) (:shadow)
-                             (:export :make-vm :vm-run :vm-step :vm) (:intern))
+(uiop/package:define-package :secd-vm/secd-vm 
+  (:nicknames) 
+  (:use :cl) 
+  (:shadow)
+  (:export :make-vm :vm-run :vm-step :vm) 
+  (:intern))
 (in-package :secd-vm/secd-vm)
 ;;don't edit above
 

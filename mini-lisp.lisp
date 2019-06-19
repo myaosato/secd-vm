@@ -12,4 +12,4 @@
   (vm-run nil nil (compile code nil nil) nil))
 
 (defmacro as-mini-lisp (body)
-  (run `,body))
+  `(run ',body))
